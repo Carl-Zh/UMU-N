@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import _ from 'lodash';
 import { IEmployee, IEmployeesAndCount } from 'plugins/local-sad';
+import { forkJoin } from 'rxjs';
 import { Repository } from 'typeorm';
 import { LocalSadService } from '../../../plugins/local-sad/services/local-sad.service';
 import { EmployeeEntity } from '../entities';
@@ -42,8 +43,7 @@ export class HCMService {
 
   // 开始从HCM同步数据
   public async syncEmployeeWithHCM(): Promise<IEmployee[]> {
-    // TODO: 配置文件
-    const pageSize = 999;
+    const pageSize = _.toNumber(process.env.HCM_PER_REQUEST_COUNT);
     const employeeAndCount = await this.localSadService.getEmployeesAndCount(1, pageSize);
     const totalEmployee = employeeAndCount.EMPLOYEE_COUNT;
     const repeatCount = totalEmployee > pageSize ? Math.ceil(totalEmployee / pageSize) : 0;
@@ -51,16 +51,14 @@ export class HCMService {
     if (repeatCount > 0) {
       const requestList: Promise<IEmployeesAndCount>[] = [];
       for (let i = 1; i < repeatCount; i++) {
-        requestList.push(this.localSadService.getEmployeesAndCount(i + 1, pageSize));
-      }
-      // TODO: 顺序取
-      const otherEmployeeAndCountList = await Promise.all(requestList);
-      _.forEach(otherEmployeeAndCountList, (otherEmployeeAndCount) => {
+        const otherEmployeeAndCount = await this.localSadService.getEmployeesAndCount(
+          i + 1,
+          pageSize,
+        );
         this.originUsers.push(...otherEmployeeAndCount.EMPLOYEE_LIST);
-      });
+      }
     }
 
-    // this.logService.createHCMFetchLogs(true, 'Fetch user from HCM success');
     return this.originUsers;
   }
 }
