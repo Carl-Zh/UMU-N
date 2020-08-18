@@ -3,6 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import _ from 'lodash';
 import { ObjectLiteral, Repository } from 'typeorm';
 import { SynchronizationLogEntity, SynchronizationScheduleEntity } from '../entities';
+import {
+  SYNCHRONIZATION_LOG_ACTION_ENUM,
+  SYNCHRONIZATION_LOG_STATUS_ENUM,
+  SYNCHRONIZATION_LOG_STEP_ENUM,
+} from '../enums';
 
 @Injectable()
 export class SynchronizationLogService {
@@ -10,6 +15,17 @@ export class SynchronizationLogService {
     @InjectRepository(SynchronizationLogEntity)
     private readonly synchronizationLogEntityRepository: Repository<SynchronizationLogEntity>,
   ) {}
+
+  public createHCMFetchLogs(success: boolean, message: string) {
+    this.synchronizationLogEntityRepository.create({
+      action: SYNCHRONIZATION_LOG_ACTION_ENUM.FETCH,
+      step: SYNCHRONIZATION_LOG_STEP_ENUM.HCM,
+      status: success
+        ? SYNCHRONIZATION_LOG_STATUS_ENUM.SUCCEEDED
+        : SYNCHRONIZATION_LOG_STATUS_ENUM.FAILED,
+      message,
+    });
+  }
 
   public createModel(
     todaySchedule: SynchronizationScheduleEntity,

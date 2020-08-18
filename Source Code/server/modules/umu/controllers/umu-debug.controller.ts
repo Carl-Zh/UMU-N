@@ -15,7 +15,6 @@ export class UmuDebugController {
   @Post('hcmall')
   public async getAllUsersFromHCM() {
     const employee = await this.hcmService.syncEmployeeWithHCM();
-    // TODO: 调用service从HCM取数据
     return employee;
   }
 

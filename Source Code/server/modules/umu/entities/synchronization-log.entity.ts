@@ -5,25 +5,25 @@ export class SynchronizationLogEntity {
   @PrimaryGeneratedColumn()
   public id: number;
 
-  @Column('int')
+  @Column('int', { nullable: true })
   public scheduleId: number;
 
-  @Column('int')
+  @Column('int', { nullable: true })
   public sequence: number;
 
-  @Column('nvarchar')
+  @Column('nvarchar', { nullable: true })
   public action: string;
 
-  @Column('nvarchar', { length: 'MAX' })
+  @Column('nvarchar', { length: 'MAX', nullable: true })
   public content: string;
 
-  @Column('nvarchar')
+  @Column('nvarchar', { nullable: true })
   public step: string;
 
-  @Column('nvarchar')
+  @Column('nvarchar', { nullable: true })
   public status: string;
 
-  @Column('nvarchar', { length: 'MAX' })
+  @Column('nvarchar', { length: 'MAX', nullable: true })
   public message: string;
 
   @CreateDateColumn()
