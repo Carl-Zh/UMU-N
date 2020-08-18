@@ -1,9 +1,10 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { HCMService } from './../services/hcm.service';
+import { UMUService } from './../services/umu.service';
 
 @Controller('api/v1/umuDebug')
 export class UmuDebugController {
-  constructor(private readonly hcmService: HCMService) {}
+  constructor(private readonly hcmService: HCMService, private readonly umuService: UMUService) {}
 
   @Post('email')
   public sendEmailToUser(@Body('targetUser') user: string) {
@@ -30,15 +31,19 @@ export class UmuDebugController {
     switch (operationType) {
       case 'getUser':
         // TODO: 发送获取用户信息的请求
+        this.umuService.getUser();
         break;
       case 'createUser':
         // TODO: 发送创建用户信息的请求
+        this.umuService.createUser();
         break;
       case 'updateUser':
         // TODO: 发送更新用户信息的请求
+        this.umuService.updateUser();
         break;
       case 'DeleteUser':
         // TODO: 发送删除用户信息的请求
+        this.umuService.deleteUser();
         break;
       default:
         break;

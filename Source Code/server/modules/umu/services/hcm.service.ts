@@ -42,6 +42,7 @@ export class HCMService {
 
   // 开始从HCM同步数据
   public async syncEmployeeWithHCM(): Promise<IEmployee[]> {
+    // TODO: 配置文件
     const pageSize = 999;
     const employeeAndCount = await this.localSadService.getEmployeesAndCount(1, pageSize);
     const totalEmployee = employeeAndCount.EMPLOYEE_COUNT;
@@ -52,14 +53,14 @@ export class HCMService {
       for (let i = 1; i < repeatCount; i++) {
         requestList.push(this.localSadService.getEmployeesAndCount(i + 1, pageSize));
       }
+      // TODO: 顺序取
       const otherEmployeeAndCountList = await Promise.all(requestList);
       _.forEach(otherEmployeeAndCountList, (otherEmployeeAndCount) => {
         this.originUsers.push(...otherEmployeeAndCount.EMPLOYEE_LIST);
       });
     }
 
-    this.logService.createHCMFetchLogs(true, 'Fetch user from HCM success');
+    // this.logService.createHCMFetchLogs(true, 'Fetch user from HCM success');
     return this.originUsers;
-    // TODO：记录操作log
   }
 }

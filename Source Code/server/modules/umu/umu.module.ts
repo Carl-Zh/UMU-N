@@ -15,7 +15,7 @@ import {
   SynchronizationLogService,
   SynchronizationScheduleService,
   SynchronizationService,
-  UMUAPIService,
+  UMUService,
 } from './services';
 import { HCMService } from './services/hcm.service';
 
@@ -33,7 +33,7 @@ const services = [
   SynchronizationLogService,
   SynchronizationScheduleService,
   SynchronizationService,
-  UMUAPIService,
+  UMUService,
   HCMService,
 ];
 const providers = [...services];

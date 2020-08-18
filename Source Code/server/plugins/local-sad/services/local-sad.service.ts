@@ -52,6 +52,7 @@ export class LocalSadService {
     if (response.status !== HTTP_STATUS_CODE_ENUM.OK) {
       throw new Error(response.statusText);
     }
+    // TODO: LOG
     return response.data;
   }
 }
