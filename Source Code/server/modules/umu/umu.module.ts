@@ -17,6 +17,7 @@ import {
   SynchronizationService,
   UMUAPIService,
 } from './services';
+import { HCMService } from './services/hcm.service';
 
 const entities = [EmployeeEntity, SynchronizationLogEntity, SynchronizationScheduleEntity];
 const modules = [
@@ -33,6 +34,7 @@ const services = [
   SynchronizationScheduleService,
   SynchronizationService,
   UMUAPIService,
+  HCMService,
 ];
 const providers = [...services];
 

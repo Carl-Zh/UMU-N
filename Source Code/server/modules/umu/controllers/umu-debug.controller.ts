@@ -1,8 +1,9 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
+import { HCMService } from './../services/hcm.service';
 
 @Controller('api/v1/umuDebug')
 export class UmuDebugController {
-  constructor() {}
+  constructor(private readonly hcmService: HCMService) {}
 
   @Post('email')
   public sendEmailToUser(@Body('targetUser') user: string) {
@@ -11,8 +12,15 @@ export class UmuDebugController {
     return { code: 200, message: 'complete' };
   }
 
+  @Post('hcmall')
+  public async getAllUsersFromHCM() {
+    const employee = await this.hcmService.syncEmployeeWithHCM();
+    // TODO: 调用service从HCM取数据
+    return employee;
+  }
+
   @Post('hcm')
-  public sendRequestToHCM(@Body('pageNumber') pageNumber = 1, @Body('pageSize') pageSize = 100) {
+  public getUsersFromHCM(@Body('pageNumber') pageNumber = 1, @Body('pageSize') pageSize = 100) {
     // TODO: 调用service从HCM取数据
     return { code: 200, message: 'complete' };
   }

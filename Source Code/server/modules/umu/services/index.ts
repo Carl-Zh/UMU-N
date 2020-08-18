@@ -4,3 +4,4 @@ export * from './synchronization-log.service';
 export * from './synchronization-schedule.service';
 export * from './synchronization.service';
 export * from './umu-api.service';
+export * from './hcm.service';

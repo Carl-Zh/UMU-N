@@ -1,16 +1,21 @@
 export interface IEmployee {
-  EMPLOYEE_GLOBAL_ID: string;
-  EMPLOYEE_ACCOUNT: string;
-  EMPLOYEE_NAME: string;
-  EMPLOYEE_EMAIL: string;
-  EMPLOYEE_CITY: string;
+  GLBL_EMPLY_ID: string;
+  ACNT_NAME: string;
+  CHINESE_NAME: string;
+  EMAIL: string;
+  CMPNY: string;
   DPRTMNT: string;
-  BU: string;
-  SALES_REGION: string;
-  USER_ROLE: string;
-  COST_CENTER: string;
-  SUPERVISOR1_ACCOUNT: string;
-  SUPERVISOR1_NAME: string;
-  SUPERVISOR1_EMAIL: string;
-  SUPERVISOR1_ROLE: string;
+  SUB_DPRTMNT: string;
+  TITLE: string;
+  JOB_FAMILIY_GROUP: string;
+  JOB_FAMILIY: string;
+  STTS_IND: string;
+  WORKER_TYPE: string;
+  WORKER_SUB_TYPE: string;
+  PAYLEVEL: string;
+  HIREDATE: string;
+  SPRVSR_GLBL_ID: string;
+  SPRVSR_CHINESE_NAME: string;
+  SPRVSR_MAIL: string;
+  PRODUCT_SLEEVE: string;
 }

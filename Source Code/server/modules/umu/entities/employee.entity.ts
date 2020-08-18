@@ -78,4 +78,8 @@ export class EmployeeEntity {
   // SPRVSR_MAIL -> "CHEN_xxx@LILLY.COM"
   @Column('nvarchar', { nullable: true, name: 'SPRVSR_MAIL' })
   public sprvsrMail: string;
+
+  // PRODUCT_SLEEVE -> ""，暂时没使用的属性
+  @Column('nvarchar', { nullable: true, name: 'PRODUCT_SLEEVE' })
+  public productSleeve: string;
 }
