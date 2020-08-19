@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import _ from 'lodash';
-import { Repository } from 'typeorm';
+import { DeepPartial, Repository } from 'typeorm';
 import { IEmployee } from '../../../plugins/local-sad';
 import { EmployeeEntity } from '../entities';
 import { SynchronizationLogService } from './synchronization-log.service';
@@ -14,53 +14,127 @@ export class EmployeeService {
     private readonly synchronizationLogService: SynchronizationLogService,
   ) {}
 
-  // 从HCM分页同步数据
-  private getEmployeeFromHCM(pageNumber = 1, pageSize = 100) {
-    // TODO: 实现分页取数据
-    // TODO：记录操作log
-  }
-
-  // 将从HCM获取的数据存入数据库
-  private saveEmployee() {
-    // TODO: 存入数据库
-    // TODO：记录操作log
-  }
-
   // 当获取到 HCM 的 Employee 数据后，与本地数据进行比较
-  public async compareEmployee(originEmployee: IEmployee[]) {
-    const existEmployee = await this.getExistEmployee();
-    const newEmployee: IEmployee[] = [];
-    const updateEmployee: IEmployee[] = [];
-    const deleteEmployee: IEmployee[] = [];
-    let countLevel1 = 0;
-    let countLevel2 = 0;
-    // tslint:disable-next-line: prefer-for-of
-    for (let i = 0; i < originEmployee.length; i++) {
-      countLevel1++;
-      let isNew = true;
-      for (let j = 0; j < existEmployee.length; j++) {
-        countLevel2++;
-        if (originEmployee[i].GLBL_EMPLY_ID === existEmployee[j].glblEmplyId) {
-          isNew = false;
-          existEmployee.splice(j, 1);
-          j--;
-          break;
+  public async compareEmployee(hcmEmployees: IEmployee[]) {
+    const existEmployees = await this.getExistEmployee();
+    const newEmployees: IEmployee[] = [];
+    const updateEmployees: IEmployee[] = [];
+    const deleteEmployees: EmployeeEntity[] = [];
+
+    _.forEach(hcmEmployees, (hcmEmployee) => {
+      const existEmployee = _.find(existEmployees, (existEmployee) => {
+        return existEmployee.glblEmplyId === hcmEmployee.GLBL_EMPLY_ID;
+      });
+      if (!existEmployee) {
+        // 筛选新用户
+        newEmployees.push(hcmEmployee);
+      } else {
+        _.remove(existEmployees, (user) => {
+          return user.glblEmplyId === existEmployee.glblEmplyId;
+        });
+        if (this.checkSingleEmployeeUpdate(hcmEmployee, existEmployee)) {
+          // 筛选更新过的用户
+          updateEmployees.push(hcmEmployee);
         }
       }
-      if (isNew) {
-        newEmployee.push(originEmployee[i]);
-      }
-    }
+    });
 
-    await this.employeeRepository.insert(newEmployee as any);
+    // 筛选要删除的用户
+    deleteEmployees.push(...existEmployees);
+
+    await this.createEmployee(newEmployees);
   }
 
-  // 从数据库读取employee数据
+  // 创建 Employee
+  public async createEmployee(newEmployees: IEmployee[]) {
+    const newEmployeeEntities: DeepPartial<EmployeeEntity>[] = [];
+    _.forEach(newEmployees, (newEmployee) => {
+      newEmployeeEntities.push(this.convertEmployeeToEntity(newEmployee, true));
+    });
+
+    // await this.employeeRepository.save(newEmployeeEntities);
+
+    const chunkNewEmployees = _.chunk(newEmployeeEntities, 50);
+    for (let i = 0; i < chunkNewEmployees.length; i++) {
+      console.log(`begin index ${i}:`, new Date());
+      const beginDate = new Date();
+      await this.employeeRepository.insert(chunkNewEmployees[i]);
+      const endDate = new Date();
+      const costTime = beginDate.getTime() - endDate.getTime();
+      console.log(`index ${i} delays:`, costTime);
+      console.log(`end index ${i}:`, new Date());
+    }
+  }
+
+  // 将从 HCM 获取的 Employee 信息转换为 EmployeeEntity
+  public convertEmployeeToEntity(
+    hcmEmployee: IEmployee,
+    isCreate: boolean,
+  ): DeepPartial<EmployeeEntity> {
+    const employee = {
+      glblEmplyId: hcmEmployee.GLBL_EMPLY_ID,
+      acntName: hcmEmployee.ACNT_NAME,
+      chineseName: hcmEmployee.CHINESE_NAME,
+      email: hcmEmployee.EMAIL,
+      cmpny: hcmEmployee.CMPNY,
+      dprtmnt: hcmEmployee.DPRTMNT,
+      subDprtmnt: hcmEmployee.SUB_DPRTMNT,
+      title: hcmEmployee.TITLE,
+      jobFamilyGroup: hcmEmployee.JOB_FAMILIY_GROUP,
+      jobFamily: hcmEmployee.JOB_FAMILIY,
+      sttsInd: hcmEmployee.STTS_IND,
+      workerType: hcmEmployee.WORKER_TYPE,
+      workerSubType: hcmEmployee.WORKER_SUB_TYPE,
+      payLevel: hcmEmployee.PAYLEVEL,
+      hireDate: hcmEmployee.HIREDATE,
+      sprvsrGlblId: hcmEmployee.SPRVSR_GLBL_ID,
+      sprvsrChineseName: hcmEmployee.SPRVSR_CHINESE_NAME,
+      sprvsrMail: hcmEmployee.SPRVSR_MAIL,
+      productSleeve: hcmEmployee.PRODUCT_SLEEVE,
+    };
+    if (isCreate) {
+      _.assign(employee, { createDate: new Date() });
+    } else {
+      _.assign(employee, { updateDate: new Date() });
+    }
+
+    return employee;
+  }
+
+  // 从数据库读取 Employee 数据
   public async getExistEmployee() {
     const existEmployee = await this.employeeRepository.find({
       where: { isDeleted: false },
       order: { glblEmplyId: 'ASC' },
     });
     return existEmployee;
+  }
+
+  // 检查用户是否需要更新
+  public checkSingleEmployeeUpdate(hcmEmployee: IEmployee, existEmployee: EmployeeEntity): boolean {
+    if (
+      existEmployee.acntName !== hcmEmployee.ACNT_NAME ||
+      existEmployee.chineseName !== hcmEmployee.CHINESE_NAME ||
+      existEmployee.email !== hcmEmployee.EMAIL ||
+      existEmployee.cmpny !== hcmEmployee.CMPNY ||
+      existEmployee.dprtmnt !== hcmEmployee.DPRTMNT ||
+      existEmployee.subDprtmnt !== hcmEmployee.SUB_DPRTMNT ||
+      existEmployee.title !== hcmEmployee.TITLE ||
+      existEmployee.jobFamilyGroup !== hcmEmployee.JOB_FAMILIY_GROUP ||
+      existEmployee.jobFamily !== hcmEmployee.JOB_FAMILIY ||
+      existEmployee.sttsInd !== hcmEmployee.STTS_IND ||
+      existEmployee.workerType !== hcmEmployee.WORKER_TYPE ||
+      existEmployee.workerSubType !== hcmEmployee.WORKER_SUB_TYPE ||
+      existEmployee.payLevel !== hcmEmployee.PAYLEVEL ||
+      existEmployee.hireDate !== hcmEmployee.HIREDATE ||
+      existEmployee.sprvsrGlblId !== hcmEmployee.SPRVSR_GLBL_ID ||
+      existEmployee.sprvsrChineseName !== hcmEmployee.SPRVSR_CHINESE_NAME ||
+      existEmployee.sprvsrMail !== hcmEmployee.SPRVSR_MAIL ||
+      existEmployee.productSleeve !== hcmEmployee.PRODUCT_SLEEVE
+    ) {
+      return true;
+    } else {
+      return false;
+    }
   }
 }

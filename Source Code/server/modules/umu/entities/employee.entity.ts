@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { BeforeInsert, BeforeUpdate, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity({ schema: 'dbo', name: 'employees' })
 export class EmployeeEntity {
@@ -45,8 +45,6 @@ export class EmployeeEntity {
   @Column('nvarchar', { nullable: true, name: 'JOB_FAMILIY' })
   public jobFamily: string;
 
-  // SPRVSR_MAIL:
-
   // STTS_IND -> "1"
   @Column('nvarchar', { nullable: true, name: 'STTS_IND' })
   public sttsInd: string;
@@ -82,4 +80,20 @@ export class EmployeeEntity {
   // PRODUCT_SLEEVE -> ""，暂时没使用的属性
   @Column('nvarchar', { nullable: true, name: 'PRODUCT_SLEEVE' })
   public productSleeve: string;
+
+  @Column('datetime2', { nullable: true, name: 'EmployeeCreateDate' })
+  public createDate: Date;
+
+  @Column('datetime2', { nullable: true, name: 'EmployeeUpdateDate' })
+  public updateDate: Date;
+
+  @BeforeInsert()
+  public beforeInsertEvent() {
+    this.createDate = new Date();
+  }
+
+  @BeforeUpdate()
+  public beforeUpdate() {
+    this.updateDate = new Date();
+  }
 }

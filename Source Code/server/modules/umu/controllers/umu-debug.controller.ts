@@ -18,8 +18,8 @@ export class UmuDebugController {
 
   @Post('hcmall')
   public async getAllUsersFromHCM() {
-    const originEmployee = await this.hcmService.fetchEmployeeFromHCM();
-    await this.employeeService.compareEmployee(originEmployee);
+    const hcmEmployees = await this.hcmService.fetchEmployeeFromHCM();
+    await this.employeeService.compareEmployee(hcmEmployees);
     return {};
   }
 
