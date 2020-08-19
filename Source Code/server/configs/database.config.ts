@@ -13,7 +13,7 @@ const {
   DATABASE_PASSWORD: password,
   DATABASE_SYNCHRONIZE: synchronize,
 } = process.env;
-const logging: LoggerOptions = isLocal() ? true : ['schema', 'error', 'migration'];
+const logging: LoggerOptions = isLocal() ? false : ['schema', 'error', 'migration'];
 
 const DATABASE_CONFIG: ConnectionOptions = {
   type: 'mssql',

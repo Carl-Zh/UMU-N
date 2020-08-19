@@ -1,10 +1,13 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
-import { HCMService } from './../services/hcm.service';
-import { UMUService } from './../services/umu.service';
+import { EmployeeService, HCMService, UMUService } from './../services';
 
 @Controller('api/v1/umuDebug')
 export class UmuDebugController {
-  constructor(private readonly hcmService: HCMService, private readonly umuService: UMUService) {}
+  constructor(
+    private readonly hcmService: HCMService,
+    private readonly umuService: UMUService,
+    private readonly employeeService: EmployeeService,
+  ) {}
 
   @Post('email')
   public sendEmailToUser(@Body('targetUser') user: string) {
@@ -15,8 +18,9 @@ export class UmuDebugController {
 
   @Post('hcmall')
   public async getAllUsersFromHCM() {
-    const employee = await this.hcmService.syncEmployeeWithHCM();
-    return employee;
+    const originEmployee = await this.hcmService.fetchEmployeeFromHCM();
+    await this.employeeService.compareEmployee(originEmployee);
+    return {};
   }
 
   @Post('hcm')
