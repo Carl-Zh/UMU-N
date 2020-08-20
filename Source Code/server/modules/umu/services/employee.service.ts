@@ -47,30 +47,33 @@ export class EmployeeService {
 
   // 创建 Employee
   public async createEmployee(newEmployees: IEmployee[]) {
-    const newEmployeeEntities: DeepPartial<EmployeeEntity>[] = [];
+    const newEmployeeEntities: any[] = [];
     _.forEach(newEmployees, (newEmployee) => {
       newEmployeeEntities.push(this.convertEmployeeToEntity(newEmployee, true));
     });
 
-    // await this.employeeRepository.save(newEmployeeEntities);
-
-    const chunkNewEmployees = _.chunk(newEmployeeEntities, 50);
-    for (let i = 0; i < chunkNewEmployees.length; i++) {
-      console.log(`begin index ${i}:`, new Date());
-      const beginDate = new Date();
-      await this.employeeRepository.insert(chunkNewEmployees[i]);
-      const endDate = new Date();
-      const costTime = beginDate.getTime() - endDate.getTime();
-      console.log(`index ${i} delays:`, costTime);
-      console.log(`end index ${i}:`, new Date());
-    }
+    const chunkNewEmployees = _.chunk(newEmployeeEntities, 2);
+    const startDate = new Date();
+    // const aaaa: any[] = [];
+    console.log('begin');
+    // for (let i = 0; i < chunkNewEmployees.length; i++) {
+    //   const beginDate = new Date();
+    //   await this.employeeRepository.insert(chunkNewEmployees[i]);
+    //   const endDate = new Date();
+    //   const costTime = endDate.getTime() - beginDate.getTime();
+    //   console.log(`index ${i} delays: ${costTime} ms`);
+    //   // aaaa.push(this.employeeRepository.insert(chunkNewEmployees[i]));
+    // }
+    // await Promise.all(aaaa);
+    await this.employeeRepository.insert(chunkNewEmployees[0]);
+    const completeDate = new Date();
+    console.log(
+      `end insert employee, total cost ${completeDate.getTime() - startDate.getTime()} ms`,
+    );
   }
 
   // 将从 HCM 获取的 Employee 信息转换为 EmployeeEntity
-  public convertEmployeeToEntity(
-    hcmEmployee: IEmployee,
-    isCreate: boolean,
-  ): DeepPartial<EmployeeEntity> {
+  public convertEmployeeToEntity(hcmEmployee: IEmployee, isCreate: boolean) {
     const employee = {
       glblEmplyId: hcmEmployee.GLBL_EMPLY_ID,
       acntName: hcmEmployee.ACNT_NAME,
@@ -104,7 +107,6 @@ export class EmployeeService {
   // 从数据库读取 Employee 数据
   public async getExistEmployee() {
     const existEmployee = await this.employeeRepository.find({
-      where: { isDeleted: false },
       order: { glblEmplyId: 'ASC' },
     });
     return existEmployee;
