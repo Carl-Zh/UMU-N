@@ -52,20 +52,20 @@ export class EmployeeService {
       newEmployeeEntities.push(this.convertEmployeeToEntity(newEmployee, true));
     });
 
-    const chunkNewEmployees = _.chunk(newEmployeeEntities, 2);
+    const chunkNewEmployees = _.chunk(newEmployeeEntities, 25);
     const startDate = new Date();
     // const aaaa: any[] = [];
     console.log('begin');
-    // for (let i = 0; i < chunkNewEmployees.length; i++) {
-    //   const beginDate = new Date();
-    //   await this.employeeRepository.insert(chunkNewEmployees[i]);
-    //   const endDate = new Date();
-    //   const costTime = endDate.getTime() - beginDate.getTime();
-    //   console.log(`index ${i} delays: ${costTime} ms`);
-    //   // aaaa.push(this.employeeRepository.insert(chunkNewEmployees[i]));
-    // }
+    for (let i = 0; i < chunkNewEmployees.length; i++) {
+      const beginDate = new Date();
+      await this.employeeRepository.insert(chunkNewEmployees[i]);
+      const endDate = new Date();
+      const costTime = endDate.getTime() - beginDate.getTime();
+      console.log(`index ${i} delays: ${costTime} ms`);
+      // aaaa.push(this.employeeRepository.insert(chunkNewEmployees[i]));
+    }
     // await Promise.all(aaaa);
-    await this.employeeRepository.insert(chunkNewEmployees[0]);
+    // await this.employeeRepository.insert(chunkNewEmployees[0]);
     const completeDate = new Date();
     console.log(
       `end insert employee, total cost ${completeDate.getTime() - startDate.getTime()} ms`,

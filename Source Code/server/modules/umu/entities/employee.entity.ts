@@ -81,11 +81,14 @@ export class EmployeeEntity {
   @Column('nvarchar', { nullable: true, name: 'PRODUCT_SLEEVE' })
   public productSleeve: string;
 
-  @Column('datetime2', { nullable: true, name: 'EmployeeCreateDate' })
+  @Column('datetime2', { nullable: true, name: 'EMPLOYEE_CREATEDATE' })
   public createDate: Date;
 
-  @Column('datetime2', { nullable: true, name: 'EmployeeUpdateDate' })
+  @Column('datetime2', { nullable: true, name: 'EMPLOYEE_UPDATEDATE' })
   public updateDate: Date;
+
+  @Column('bit', { nullable: true, name: 'IS_UPLOAD_TO_UMU' })
+  public isUploadToUMU: boolean;
 
   @BeforeInsert()
   public beforeInsertEvent() {
